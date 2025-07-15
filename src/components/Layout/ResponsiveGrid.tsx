@@ -16,10 +16,7 @@ export default function ResponsiveGrid({ children }: ResponsiveGridProps) {
       {/* 表單區域 */}
       <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33%' } }}>
         <Paper elevation={2} sx={{ p: 3, height: 'fit-content' }}>
-          <Box sx={{ minHeight: '300px' }}>
-            {/* 表單內容將在 Story 4 實作 */}
-            <div>組隊表單區域 (Story 4 實作)</div>
-          </Box>
+          {children}
         </Paper>
       </Box>
 
@@ -28,7 +25,6 @@ export default function ResponsiveGrid({ children }: ResponsiveGridProps) {
         <Paper elevation={2} sx={{ p: 3, minHeight: '400px' }}>
           {/* 列表內容將在 Story 5 實作 */}
           <div>組隊列表區域 (Story 5 實作)</div>
-          {children}
         </Paper>
       </Box>
     </Stack>
