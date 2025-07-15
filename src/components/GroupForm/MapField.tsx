@@ -20,15 +20,13 @@ export default function MapField() {
             label="地圖"
             value={field.value || ''}
           >
-            <MenuItem value="DT">DT (Dragon Tower)</MenuItem>
-            <MenuItem value="PW">PW (Phoenix Wing)</MenuItem>
-            <MenuItem value="CD">CD (Crystal Dungeon)</MenuItem>
+            <MenuItem value="DT">DT</MenuItem>
+            <MenuItem value="PW">PW</MenuItem>
+            <MenuItem value="CD">CD</MenuItem>
           </Select>
-          {errors.map && (
             <FormHelperText>
-              {errors.map.message || '地圖是必填的'}
+              {errors.map?.message ?? ''}
             </FormHelperText>
-          )}
         </FormControl>
       )}
     />

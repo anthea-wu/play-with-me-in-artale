@@ -23,7 +23,7 @@ export function StartTimeField() {
             textField: {
               fullWidth: true,
               error: !!errors.startTime,
-              helperText: errors.startTime?.message || '開始時間是必填的',
+              helperText: errors.startTime?.message ?? '',
             },
           }}
         />
@@ -50,7 +50,7 @@ export function EndTimeField() {
             textField: {
               fullWidth: true,
               error: !!errors.endTime,
-              helperText: errors.endTime?.message || '結束時間是必填的',
+              helperText: errors.endTime?.message ?? '',
             },
           }}
         />

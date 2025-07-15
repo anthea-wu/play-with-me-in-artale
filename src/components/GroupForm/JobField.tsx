@@ -23,11 +23,9 @@ export default function JobField() {
             <MenuItem value="龍騎士">龍騎士</MenuItem>
             <MenuItem value="祭司">祭司</MenuItem>
           </Select>
-          {errors.job && (
             <FormHelperText>
-              {errors.job.message || '職業是必填的'}
+              {errors.job?.message ?? ''}
             </FormHelperText>
-          )}
         </FormControl>
       )}
     />

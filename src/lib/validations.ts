@@ -14,25 +14,23 @@ export enum MapEnum {
 
 // Group validation schemas
 export const CreateGroupSchema = z.object({
-  job: z.nativeEnum(JobEnum, {
-    message: 'Job must be either 龍騎士 or 祭司'
-  }),
+  job: z.enum(JobEnum, '請選擇職業'),
   level: z.number({
     error: '請輸入數字'
   }).min(70, '目前開放的最低等級是 70 等'),
-  map: z.nativeEnum(MapEnum, {
-    message: 'Map must be DT, PW, or CD'
-  }),
-  startTime: z.string().datetime('Start time must be a valid ISO 8601 datetime'),
-  endTime: z.string().datetime('End time must be a valid ISO 8601 datetime'),
-  gameId: z.string().min(1, 'Game ID is required').max(50, 'Game ID must not exceed 50 characters'),
-  discordId: z.string().max(50, 'Discord ID must not exceed 50 characters').optional(),
+  map: z.enum(MapEnum, '請選擇地圖'),
+  startTime: z.iso.datetime('請選擇開始時間'),
+  endTime: z.iso.datetime('請選擇結束時間'),
+  gameId: z.string({
+    error: '請輸入遊戲 ID'
+  }).min(1, '請輸入遊戲 ID'),
+  discordId: z.string().optional(),
 }).refine((data) => {
   const start = new Date(data.startTime);
   const end = new Date(data.endTime);
   return end > start;
 }, {
-  message: 'End time must be after start time',
+  message: '結束時間需比開始時間晚',
   path: ['endTime']
 });
 

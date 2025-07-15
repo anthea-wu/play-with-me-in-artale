@@ -36,6 +36,8 @@ export default function GroupFormProvider({ children, onSubmit, onSuccess }: Gro
     resolver: zodResolver(CreateGroupSchema),
     defaultValues: {
       level: 70,
+      gameId: '',
+      discordId: '',
     }
   });
 

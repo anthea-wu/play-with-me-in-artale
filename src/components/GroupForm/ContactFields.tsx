@@ -17,7 +17,7 @@ export function GameIdField() {
           label="遊戲 ID"
           placeholder="請輸入您的遊戲 ID"
           error={!!errors.gameId}
-          helperText={errors.gameId?.message || '遊戲 ID 是必填的'}
+          helperText={errors.gameId?.message ?? ''}
           fullWidth
         />
       )}
