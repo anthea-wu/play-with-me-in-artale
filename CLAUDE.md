@@ -33,6 +33,11 @@
 - **測試優先**: 先寫測試，再實作功能
 - **持續重構**: 確保程式碼品質
 
+### 溝通規範
+- **對話語言**: 與使用者對話時使用繁體中文
+- **程式語言**: 程式碼、commit message、commands 使用英文
+- **文件**: 專案文件使用繁體中文，技術註解使用英文
+
 ### 技術棧
 - **前端**: Next.js (React + Material-UI) + TypeScript
 - **後端**: Next.js API Routes
@@ -157,6 +162,7 @@ interface GetGroupsResponse {
 - [ ] 功能符合所有 Acceptance Criteria
 - [ ] 通過所有測試 (單元測試 + 整合測試)
 - [ ] 程式碼通過 ESLint + Prettier 檢查
+- [ ] 本地 `npm run build` 建置成功
 - [ ] 部署到 Vercel 正常運作
 - [ ] 響應式設計在各裝置正常顯示
 - [ ] 程式碼經過 code review
@@ -187,6 +193,24 @@ npm run build
 npx prisma migrate dev
 npx prisma studio
 ```
+
+## Sprint 1 Retrospective 改進事項
+
+### Story 2 開始前的準備工作
+- [ ] 建立 pre-commit hook 自動執行 lint 和 build
+- [ ] 選擇穩定版本的 API 和組件，避免實驗性功能
+- [ ] 每次推送前執行 `npm run build` 測試
+- [ ] 準備 TDD 測試環境
+
+### 技術決策記錄
+- **響應式布局**: 優先使用 MUI Stack 而非 Grid2 (相容性考量)
+- **部署流程**: GitHub push → Vercel 自動部署
+- **錯誤處理**: TypeScript 嚴格模式幫助提早發現問題
+
+### 團隊協作優化
+- **明確 AC**: 未來 Story 的 AC 包含具體的技術要求
+- **分工清晰**: PO 負責需求、Tech 負責架構、Dev 負責實作
+- **問題解決**: 遇到技術問題時快速協作解決
 
 ---
 
