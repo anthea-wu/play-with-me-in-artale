@@ -7,7 +7,7 @@ import GroupFormProvider, { useGroupFormContext } from './GroupFormProvider';
 import JobField from './JobField';
 import LevelField from './LevelField';
 import MapField from './MapField';
-import { StartTimeField, EndTimeField } from './TimeFields';
+import WeeklyTimeGridField from './WeeklyTimeGridField';
 import { GameIdField, DiscordIdField } from './ContactFields';
 import SubmitButton from './SubmitButton';
 
@@ -40,8 +40,7 @@ function GroupFormContent() {
         <JobField />
         <LevelField />
         <MapField />
-        <StartTimeField />
-        <EndTimeField />
+        <WeeklyTimeGridField />
         <GameIdField />
         <DiscordIdField />
         <SubmitButton isSubmitting={isSubmitting} />

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,16 +8,15 @@ datasource db {
 }
 
 model Group {
-  id        String   @id @default(cuid())
-  job       String   // '龍騎士' | '祭司'
-  level     Int      // >= 70
-  map       String   // 'DT' | 'PW' | 'CD'
-  startTime DateTime @map("start_time")
-  endTime   DateTime @map("end_time")
-  gameId    String   @map("game_id")
-  discordId String?  @map("discord_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  userId    String?  @map("user_id")
+  id             String   @id @default(cuid())
+  job            String   // '龍騎士' | '祭司'
+  level          Int      // >= 70
+  map            String   // 'DT' | 'PW' | 'CD'
+  availableTimes String[] @map("available_times") // ["MON_14", "TUE_20", "WED_09"]
+  gameId         String   @map("game_id")
+  discordId      String?  @map("discord_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  userId         String?  @map("user_id")
 
   @@map("groups")
 }
