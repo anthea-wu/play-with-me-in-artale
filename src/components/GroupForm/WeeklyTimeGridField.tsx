@@ -73,60 +73,80 @@ export default function WeeklyTimeGridField() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragAction, setDragAction] = useState<'select' | 'deselect'>('select');
   const tableRef = useRef<HTMLTableElement>(null);
+  const fieldRef = useRef<{ value: string[]; onChange: (value: string[]) => void } | null>(null);
+
+  // 拖拽結束
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // 滑鼠離開表格區域
+  const handleMouseLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // 切換時間格子狀態
+  const toggleTimeSlot = useCallback((day: string, hour: number) => {
+    if (!fieldRef.current) return;
+    
+    const selectedTimes = fieldRef.current.value || [];
+    const timeSlotKey = getTimeSlotKey(day, hour);
+    const newSelectedTimes = selectedTimes.includes(timeSlotKey)
+      ? selectedTimes.filter((time: string) => time !== timeSlotKey)
+      : [...selectedTimes, timeSlotKey];
+    fieldRef.current.onChange(newSelectedTimes);
+  }, []);
+
+  // 拖拽開始
+  const handleMouseDown = useCallback((day: string, hour: number, event: React.MouseEvent) => {
+    event.preventDefault(); // 防止預設的拖拽行為
+    
+    if (!fieldRef.current) return;
+    
+    const selectedTimes = fieldRef.current.value || [];
+    const timeSlotKey = getTimeSlotKey(day, hour);
+    const isCurrentlySelected = selectedTimes.includes(timeSlotKey);
+    
+    setIsDragging(true);
+    setDragAction(isCurrentlySelected ? 'deselect' : 'select');
+    
+    // 立即處理當前格子
+    toggleTimeSlot(day, hour);
+  }, [toggleTimeSlot]);
+
+  // 拖拽過程中
+  const handleMouseEnter = useCallback((day: string, hour: number) => {
+    if (!isDragging || !fieldRef.current) return;
+    
+    const selectedTimes = fieldRef.current.value || [];
+    const timeSlotKey = getTimeSlotKey(day, hour);
+    const isCurrentlySelected = selectedTimes.includes(timeSlotKey);
+    
+    // 根據拖拽動作決定是否要改變狀態
+    if (dragAction === 'select' && !isCurrentlySelected) {
+      toggleTimeSlot(day, hour);
+    } else if (dragAction === 'deselect' && isCurrentlySelected) {
+      toggleTimeSlot(day, hour);
+    }
+  }, [isDragging, dragAction, toggleTimeSlot]);
+
+  // 刪除時間標籤
+  const handleDeleteTimeSlot = useCallback((timeSlotToDelete: string) => {
+    if (!fieldRef.current) return;
+    
+    const selectedTimes = fieldRef.current.value || [];
+    const newSelectedTimes = selectedTimes.filter((time: string) => time !== timeSlotToDelete);
+    fieldRef.current.onChange(newSelectedTimes);
+  }, []);
 
   return (
     <Controller
       name="availableTimes"
       control={control}
       render={({ field }) => {
+        // 將 field 存到 ref 中供事件處理器使用
+        fieldRef.current = field;
         const selectedTimes = field.value || [];
-        
-        const toggleTimeSlot = (day: string, hour: number) => {
-          const timeSlotKey = getTimeSlotKey(day, hour);
-          const newSelectedTimes = selectedTimes.includes(timeSlotKey)
-            ? selectedTimes.filter(time => time !== timeSlotKey)
-            : [...selectedTimes, timeSlotKey];
-          field.onChange(newSelectedTimes);
-        };
-
-        // 拖拽開始
-        const handleMouseDown = useCallback((day: string, hour: number, event: React.MouseEvent) => {
-          event.preventDefault(); // 防止預設的拖拽行為
-          
-          const timeSlotKey = getTimeSlotKey(day, hour);
-          const isCurrentlySelected = selectedTimes.includes(timeSlotKey);
-          
-          setIsDragging(true);
-          setDragAction(isCurrentlySelected ? 'deselect' : 'select');
-          
-          // 立即處理當前格子
-          toggleTimeSlot(day, hour);
-        }, [selectedTimes, toggleTimeSlot]);
-
-        // 拖拽過程中
-        const handleMouseEnter = useCallback((day: string, hour: number) => {
-          if (!isDragging) return;
-          
-          const timeSlotKey = getTimeSlotKey(day, hour);
-          const isCurrentlySelected = selectedTimes.includes(timeSlotKey);
-          
-          // 根據拖拽動作決定是否要改變狀態
-          if (dragAction === 'select' && !isCurrentlySelected) {
-            toggleTimeSlot(day, hour);
-          } else if (dragAction === 'deselect' && isCurrentlySelected) {
-            toggleTimeSlot(day, hour);
-          }
-        }, [isDragging, dragAction, selectedTimes, toggleTimeSlot]);
-
-        // 拖拽結束
-        const handleMouseUp = useCallback(() => {
-          setIsDragging(false);
-        }, []);
-
-        // 滑鼠離開表格區域
-        const handleMouseLeave = useCallback(() => {
-          setIsDragging(false);
-        }, []);
 
         return (
           <Box>
@@ -249,10 +269,7 @@ export default function WeeklyTimeGridField() {
                         label={`${dayLabel} ${hour}:00`}
                         size="small"
                         variant="outlined"
-                        onDelete={() => {
-                          const newSelectedTimes = selectedTimes.filter(time => time !== timeSlot);
-                          field.onChange(newSelectedTimes);
-                        }}
+                        onDelete={() => handleDeleteTimeSlot(timeSlot)}
                       />
                     );
                   })}
