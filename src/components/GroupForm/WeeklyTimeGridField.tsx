@@ -48,15 +48,17 @@ const TimeCell = styled(TableCell)<{ selected?: boolean; isDragging?: boolean }>
   msUserSelect: 'none',
   WebkitTouchCallout: 'none',
   WebkitTapHighlightColor: 'transparent',
-  // iOS Safari 特定優化
-  touchAction: 'none', // 完全禁用觸控手勢
-  overscrollBehavior: 'contain', // 防止過度滾動
-  WebkitOverflowScrolling: 'touch', // iOS 平滑滾動
+  // 桌面設備保持正常觸控行為
+  touchAction: 'auto',
   '@media (max-width: 768px)': {
     width: '28px',
     height: '28px',
     minWidth: '28px',
     fontSize: '0.65rem',
+    // 手機設備才禁用觸控手勢
+    touchAction: 'none',
+    overscrollBehavior: 'contain',
+    WebkitOverflowScrolling: 'touch',
     // 增加觸控目標大小
     '&::after': {
       content: '""',
@@ -175,11 +177,21 @@ export default function WeeklyTimeGridField() {
 
   // 改進的觸控事件處理
 
+  // 檢測是否為手機設備
+  const isMobileDevice = useCallback(() => {
+    return window.innerWidth <= 768 || 'ontouchstart' in window;
+  }, []);
+
   // 1. 觸控開始 - 加入長按檢測
   const handleTouchStart = useCallback((day: string, hour: number, event: React.TouchEvent) => {
+    // 只在手機設備上處理觸控事件
+    if (!isMobileDevice()) {
+      return;
+    }
+
     const touch = event.touches[0];
     
-    // iOS Safari 需要立即阻止預設行為
+    // 手機設備需要阻止預設行為
     event.preventDefault();
     
     // 記錄起始位置
@@ -198,11 +210,12 @@ export default function WeeklyTimeGridField() {
       // 開始拖拽
       startDrag(day, hour);
     }, LONG_PRESS_DURATION);
-  }, [startDrag]);
+  }, [startDrag, isMobileDevice]);
 
   // 2. 觸控移動 - 加入滑動檢測
   const handleTouchMove = useCallback((event: React.TouchEvent) => {
-    if (!touchStartPos) return;
+    // 只在手機設備上處理
+    if (!isMobileDevice() || !touchStartPos) return;
     
     const touch = event.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartPos.x);
@@ -210,7 +223,7 @@ export default function WeeklyTimeGridField() {
     
     setTouchMoveCount(prev => prev + 1);
     
-    // iOS Safari: 總是阻止預設行為，防止頁面滑動
+    // 手機設備：阻止預設行為，防止頁面滑動
     event.preventDefault();
     
     // 如果移動距離超過閾值，取消長按
@@ -244,10 +257,13 @@ export default function WeeklyTimeGridField() {
       const [day, hour] = timeSlotKey.split('_');
       processDrag(day, parseInt(hour));
     }
-  }, [touchStartPos, isDragging, processDrag]);
+  }, [touchStartPos, isDragging, processDrag, isMobileDevice]);
 
   // 3. 觸控結束 - 清理狀態
   const handleTouchEnd = useCallback((event: React.TouchEvent) => {
+    // 只在手機設備上處理
+    if (!isMobileDevice()) return;
+
     // 清理長按定時器
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
@@ -272,17 +288,20 @@ export default function WeeklyTimeGridField() {
     setTouchMoveCount(0);
     setIsLongPress(false);
     lastProcessedCell.current = null;
-  }, [isLongPress, touchMoveCount, isDragging, toggleTimeSlot]);
+  }, [isLongPress, touchMoveCount, isDragging, toggleTimeSlot, isMobileDevice]);
 
   // 表格容器的改進
   const handleTableTouchMove = useCallback((event: React.TouchEvent) => {
+    // 只在手機設備上處理
+    if (!isMobileDevice()) return;
+
     // 只有在拖拽時才阻止滑動
     if (isDragging) {
       event.preventDefault();
     }
     
     handleTouchMove(event);
-  }, [isDragging, handleTouchMove]);
+  }, [isDragging, handleTouchMove, isMobileDevice]);
 
   // cleanup effect
   useEffect(() => {
@@ -325,31 +344,50 @@ export default function WeeklyTimeGridField() {
               </Box>
             </Typography>
 
-            {/* iOS Safari 觸控隔離包裝器 */}
+            {/* 響應式觸控包裝器 */}
             <Box 
               sx={{ 
-                // iOS Safari 觸控隔離
-                touchAction: 'none',
-                overscrollBehavior: 'contain',
                 position: 'relative',
-                WebkitOverflowScrolling: 'touch',
+                // 桌面設備保持正常行為
+                touchAction: 'auto',
+                '@media (max-width: 768px)': {
+                  // 手機設備才啟用觸控隔離
+                  touchAction: 'none',
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch',
+                }
               }}
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
+              onTouchStart={(e) => {
+                // 只在手機設備上阻止事件冒泡
+                if (window.innerWidth <= 768) {
+                  e.stopPropagation();
+                }
+              }}
+              onTouchMove={(e) => {
+                if (window.innerWidth <= 768) {
+                  e.stopPropagation();
+                }
+              }}
+              onTouchEnd={(e) => {
+                if (window.innerWidth <= 768) {
+                  e.stopPropagation();
+                }
+              }}
             >
               <TableContainer 
                 component={Paper} 
                 sx={{ 
                   maxHeight: 400, 
                   overflow: 'auto',
-                  // iOS Safari 特定優化
-                  touchAction: 'none', // 完全禁用觸控手勢
-                  overscrollBehavior: 'contain', // 防止過度滾動
-                  WebkitOverflowScrolling: 'touch', // iOS 平滑滾動
+                  // 桌面設備保持正常滾動
+                  touchAction: 'auto',
                   '@media (max-width: 768px)': {
                     maxWidth: '100%',
-                    overflowX: 'auto'
+                    overflowX: 'auto',
+                    // 手機設備才啟用觸控優化
+                    touchAction: 'none',
+                    overscrollBehavior: 'contain',
+                    WebkitOverflowScrolling: 'touch',
                   }
                 }}
               >
@@ -359,11 +397,13 @@ export default function WeeklyTimeGridField() {
                 size="small" 
                 sx={{
                   minWidth: 600,
-                  // iOS Safari 特定優化
-                  touchAction: 'none',
-                  overscrollBehavior: 'contain',
+                  // 桌面設備保持正常行為
+                  touchAction: 'auto',
                   '@media (max-width: 768px)': {
-                    minWidth: 500
+                    minWidth: 500,
+                    // 手機設備才啟用觸控優化
+                    touchAction: 'none',
+                    overscrollBehavior: 'contain',
                   }
                 }}
                 onMouseUp={handleMouseUp}
