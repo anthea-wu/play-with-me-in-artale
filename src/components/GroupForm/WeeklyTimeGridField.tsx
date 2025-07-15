@@ -466,7 +466,6 @@ export default function WeeklyTimeGridField() {
                             selected={isSelected}
                             isDragging={isDragging}
                             data-time-slot={timeSlotKey}
-                            onClick={() => toggleTimeSlot(day.key, hour)}
                             onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
                             onMouseEnter={() => handleMouseEnter(day.key, hour)}
                             onTouchStart={(event) => handleTouchStart(day.key, hour, event)}
