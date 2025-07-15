@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import { CreateGroupInput } from '@/lib/validations';
 
-// 時間格子的樣式化組件
 const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected }) => ({
   padding: '2px',
   width: '32px',
@@ -35,7 +34,6 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
       : theme.palette.action.hover,
   },
   userSelect: 'none',
-  // 響應式設計：在小螢幕上調整格子大小
   '@media (max-width: 768px)': {
     width: '28px',
     height: '28px',
@@ -44,7 +42,6 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
   },
 }));
 
-// 週天數據
 const WEEKDAYS = [
   { key: 'MON', label: '週一' },
   { key: 'TUE', label: '週二' },
@@ -55,15 +52,12 @@ const WEEKDAYS = [
   { key: 'SUN', label: '週日' },
 ];
 
-// 生成 24 小時陣列
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-// 格式化時間顯示
 const formatHour = (hour: number) => {
   return hour.toString().padStart(2, '0') + ':00';
 };
 
-// 生成時間格子的 key
 const getTimeSlotKey = (day: string, hour: number) => {
   return `${day}_${hour.toString().padStart(2, '0')}`;
 };
@@ -99,14 +93,13 @@ export default function WeeklyTimeGridField() {
             <TableContainer component={Paper} sx={{ 
               maxHeight: 400, 
               overflow: 'auto',
-              // 響應式設計：在小螢幕上允許橫向滾動
               '@media (max-width: 768px)': {
                 maxWidth: '100%',
                 overflowX: 'auto'
               }
             }}>
               <Table stickyHeader size="small" sx={{
-                minWidth: 600, // 確保表格最小寬度
+                minWidth: 600,
                 '@media (max-width: 768px)': {
                   minWidth: 500
                 }
@@ -119,7 +112,7 @@ export default function WeeklyTimeGridField() {
                       position: 'sticky',
                       left: 0,
                       backgroundColor: 'background.paper',
-                      zIndex: 1
+                      zIndex: 2
                     }}>
                       時間
                     </TableCell>
