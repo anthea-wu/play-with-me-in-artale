@@ -1,6 +1,6 @@
 'use client';
 
-import { Grid, Paper, Box } from '@mui/material';
+import { Paper, Box, Stack } from '@mui/material';
 
 interface ResponsiveGridProps {
   children: React.ReactNode;
@@ -8,24 +8,29 @@ interface ResponsiveGridProps {
 
 export default function ResponsiveGrid({ children }: ResponsiveGridProps) {
   return (
-    <Grid container spacing={3}>
+    <Stack
+      direction={{ xs: 'column', md: 'row' }}
+      spacing={3}
+      sx={{ width: '100%' }}
+    >
       {/* 表單區域 */}
-      <Grid item xs={12} md={4}>
+      <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33%' } }}>
         <Paper elevation={2} sx={{ p: 3, height: 'fit-content' }}>
           <Box sx={{ minHeight: '300px' }}>
             {/* 表單內容將在 Story 4 實作 */}
             <div>組隊表單區域 (Story 4 實作)</div>
           </Box>
         </Paper>
-      </Grid>
+      </Box>
 
       {/* 列表區域 */}
-      <Grid item xs={12} md={8}>
+      <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 67%' } }}>
         <Paper elevation={2} sx={{ p: 3, minHeight: '400px' }}>
           {/* 列表內容將在 Story 5 實作 */}
           <div>組隊列表區域 (Story 5 實作)</div>
+          {children}
         </Paper>
-      </Grid>
-    </Grid>
+      </Box>
+    </Stack>
   );
 }
