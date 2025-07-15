@@ -34,26 +34,45 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
       ? theme.palette.primary.dark 
       : theme.palette.action.hover,
   },
+  // 觸控裝置優化
+  '&:active': {
+    backgroundColor: selected 
+      ? theme.palette.primary.dark 
+      : theme.palette.action.selected,
+    transform: 'scale(0.95)',
+  },
   userSelect: 'none',
   WebkitUserSelect: 'none',
   MozUserSelect: 'none',
   msUserSelect: 'none',
+  WebkitTouchCallout: 'none',
+  WebkitTapHighlightColor: 'transparent',
   '@media (max-width: 768px)': {
     width: '28px',
     height: '28px',
     minWidth: '28px',
     fontSize: '0.65rem',
+    // 增加觸控目標大小
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: '-4px',
+      left: '-4px',
+      right: '-4px',
+      bottom: '-4px',
+      zIndex: -1,
+    }
   },
 }));
 
 const WEEKDAYS = [
-  { key: 'MON', label: '週一' },
-  { key: 'TUE', label: '週二' },
-  { key: 'WED', label: '週三' },
-  { key: 'THU', label: '週四' },
-  { key: 'FRI', label: '週五' },
-  { key: 'SAT', label: '週六' },
-  { key: 'SUN', label: '週日' },
+  { key: 'MON', label: '一' },
+  { key: 'TUE', label: '二' },
+  { key: 'WED', label: '三' },
+  { key: 'THU', label: '四' },
+  { key: 'FRI', label: '五' },
+  { key: 'SAT', label: '六' },
+  { key: 'SUN', label: '日' },
 ];
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -97,10 +116,8 @@ export default function WeeklyTimeGridField() {
     fieldRef.current.onChange(newSelectedTimes);
   }, []);
 
-  // 拖拽開始
-  const handleMouseDown = useCallback((day: string, hour: number, event: React.MouseEvent) => {
-    event.preventDefault(); // 防止預設的拖拽行為
-    
+  // 統一的拖拽開始邏輯
+  const startDrag = useCallback((day: string, hour: number) => {
     if (!fieldRef.current) return;
     
     const selectedTimes = fieldRef.current.value || [];
@@ -114,8 +131,8 @@ export default function WeeklyTimeGridField() {
     toggleTimeSlot(day, hour);
   }, [toggleTimeSlot]);
 
-  // 拖拽過程中
-  const handleMouseEnter = useCallback((day: string, hour: number) => {
+  // 統一的拖拽過程邏輯
+  const processDrag = useCallback((day: string, hour: number) => {
     if (!isDragging || !fieldRef.current) return;
     
     const selectedTimes = fieldRef.current.value || [];
@@ -129,6 +146,42 @@ export default function WeeklyTimeGridField() {
       toggleTimeSlot(day, hour);
     }
   }, [isDragging, dragAction, toggleTimeSlot]);
+
+  // 滑鼠事件
+  const handleMouseDown = useCallback((day: string, hour: number, event: React.MouseEvent) => {
+    event.preventDefault();
+    startDrag(day, hour);
+  }, [startDrag]);
+
+  const handleMouseEnter = useCallback((day: string, hour: number) => {
+    processDrag(day, hour);
+  }, [processDrag]);
+
+  // 觸控事件
+  const handleTouchStart = useCallback((day: string, hour: number, event: React.TouchEvent) => {
+    event.preventDefault();
+    startDrag(day, hour);
+  }, [startDrag]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    event.preventDefault();
+    
+    // 獲取觸控點下的元素
+    const touch = event.touches[0];
+    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (elementBelow && elementBelow.getAttribute('data-time-slot')) {
+      const [day, hour] = elementBelow.getAttribute('data-time-slot')!.split('_');
+      processDrag(day, parseInt(hour));
+    }
+  }, [isDragging, processDrag]);
+
+  // 觸控結束
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   // 刪除時間標籤
   const handleDeleteTimeSlot = useCallback((timeSlotToDelete: string) => {
@@ -156,6 +209,10 @@ export default function WeeklyTimeGridField() {
             
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               點擊或拖拽格子選擇您的可遊戲時間（已選擇 {selectedTimes.length} 個時段）
+              <br />
+              <Box component="span" sx={{ '@media (max-width: 768px)': { display: 'inline' }, '@media (min-width: 769px)': { display: 'none' } }}>
+                手機：長按後拖拽選取多個時段
+              </Box>
             </Typography>
 
             <TableContainer component={Paper} sx={{ 
@@ -178,6 +235,8 @@ export default function WeeklyTimeGridField() {
                 }}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
                 <TableHead>
                   <TableRow>
@@ -240,9 +299,11 @@ export default function WeeklyTimeGridField() {
                           <TimeCell
                             key={timeSlotKey}
                             selected={isSelected}
+                            data-time-slot={timeSlotKey}
                             onClick={() => toggleTimeSlot(day.key, hour)}
                             onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
                             onMouseEnter={() => handleMouseEnter(day.key, hour)}
+                            onTouchStart={(event) => handleTouchStart(day.key, hour, event)}
                           >
                             {isSelected ? '●' : ''}
                           </TimeCell>
