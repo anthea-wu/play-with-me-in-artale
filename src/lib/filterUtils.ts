@@ -3,8 +3,7 @@ export interface Group {
   job: string;
   level: number;
   map: string;
-  startTime: string;
-  endTime: string;
+  availableTimes: string[];
   gameId: string;
   discordId: string | null;
   createdAt: string;

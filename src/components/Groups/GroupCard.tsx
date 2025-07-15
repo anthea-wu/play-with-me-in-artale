@@ -19,6 +19,7 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import dayjs from 'dayjs';
+import { formatAvailableTimes, getTimesSummary } from '@/lib/timeUtils';
 
 interface GroupCardProps {
   group: {
@@ -26,8 +27,7 @@ interface GroupCardProps {
     job: string;
     level: number;
     map: string;
-    startTime: string;
-    endTime: string;
+    availableTimes: string[];
     gameId: string;
     discordId: string | null;
     createdAt: string;
@@ -52,10 +52,6 @@ export function GroupCard({ group }: GroupCardProps) {
     if (group.discordId) {
       window.open(`https://discord.com/users/${group.discordId}`, '_blank');
     }
-  };
-
-  const formatTime = (dateString: string) => {
-    return dayjs(dateString).format('MM/DD HH:mm');
   };
 
   const getJobColor = (job: string) => {
@@ -121,12 +117,24 @@ export function GroupCard({ group }: GroupCardProps) {
             </Typography>
           </Stack>
 
-          {/* Time */}
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <AccessTime fontSize="small" color="action" />
-            <Typography variant="body2">
-              {formatTime(group.startTime)} - {formatTime(group.endTime)}
-            </Typography>
+          {/* Available Times */}
+          <Stack direction="row" alignItems="flex-start" spacing={1}>
+            <AccessTime fontSize="small" color="action" sx={{ mt: 0.5 }} />
+            <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
+              <Typography variant="body2" fontWeight="medium">
+                {getTimesSummary(group.availableTimes)}
+              </Typography>
+              <Typography 
+                variant="caption" 
+                color="text.secondary"
+                sx={{ 
+                  wordBreak: 'break-all',
+                  lineHeight: 1.2
+                }}
+              >
+                {formatAvailableTimes(group.availableTimes)}
+              </Typography>
+            </Stack>
           </Stack>
 
           <Divider />
