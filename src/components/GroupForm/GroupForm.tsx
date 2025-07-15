@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -25,6 +26,7 @@ interface GroupFormProps {
 }
 
 export default function GroupForm({ onSuccess }: GroupFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -70,6 +72,11 @@ export default function GroupForm({ onSuccess }: GroupFormProps) {
       setSubmitSuccess(true);
       reset();
       onSuccess?.();
+      
+      // 3秒後導航到組隊列表
+      setTimeout(() => {
+        router.push('/groups');
+      }, 3000);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : '建立組隊失敗');
     } finally {
@@ -91,7 +98,7 @@ export default function GroupForm({ onSuccess }: GroupFormProps) {
 
       {submitSuccess && (
         <Alert severity="success" sx={{ mb: 2 }}>
-          組隊請求已成功建立！
+          組隊請求已成功建立！3秒後將自動跳轉到組隊列表...
         </Alert>
       )}
 
