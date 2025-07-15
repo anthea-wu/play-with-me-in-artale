@@ -1,0 +1,64 @@
+### Test GET /api/groups
+GET http://localhost:3000/api/groups
+Content-Type: application/json
+
+###
+
+### Test POST /api/groups - Valid Data
+POST http://localhost:3000/api/groups
+Content-Type: application/json
+
+{
+  "job": "龍騎士",
+  "level": 85,
+  "map": "DT",
+  "startTime": "2025-07-15T20:00:00Z",
+  "endTime": "2025-07-15T22:00:00Z",
+  "gameId": "TestPlayer123",
+  "discordId": "test#1234"
+}
+
+###
+
+### Test POST /api/groups - Invalid Level
+POST http://localhost:3000/api/groups
+Content-Type: application/json
+
+{
+  "job": "龍騎士",
+  "level": 50,
+  "map": "DT",
+  "startTime": "2025-07-15T20:00:00Z",
+  "endTime": "2025-07-15T22:00:00Z",
+  "gameId": "TestPlayer123"
+}
+
+###
+
+### Test POST /api/groups - Invalid Job
+POST http://localhost:3000/api/groups
+Content-Type: application/json
+
+{
+  "job": "戰士",
+  "level": 85,
+  "map": "DT",
+  "startTime": "2025-07-15T20:00:00Z",
+  "endTime": "2025-07-15T22:00:00Z",
+  "gameId": "TestPlayer123"
+}
+
+###
+
+### Test POST /api/groups - End Time Before Start Time
+POST http://localhost:3000/api/groups
+Content-Type: application/json
+
+{
+  "job": "祭司",
+  "level": 78,
+  "map": "PW",
+  "startTime": "2025-07-15T22:00:00Z",
+  "endTime": "2025-07-15T20:00:00Z",
+  "gameId": "TestPriest456"
+}
