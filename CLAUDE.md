@@ -128,16 +128,23 @@ interface GetGroupsResponse {
 
 ## 介面設計規範
 
+### 頁面架構 (已重構)
+- **首頁** (`/`): 導航和介紹頁面
+- **建立組隊** (`/create`): 組隊表單頁面
+- **組隊列表** (`/groups`): 組隊列表頁面
+- **全域導航**: AppBar 組件提供頁面間導航
+
 ### 響應式布局
-- **桌面**: 左側表單，右側列表 (左右分欄)
-- **手機**: 上方表單，下方列表 (上下堆疊)
-- **平板**: 依螢幕尺寸適應
+- **桌面**: 各頁面獨立響應式設計
+- **手機**: 堆疊式布局適應小螢幕
+- **平板**: 自動適應中等螢幕
 
 ### Material-UI 組件使用
 - 表單: TextField, Select, DateTimePicker, Button
-- 列表: Card, CardContent, Grid
+- 列表: Card, CardContent, Stack (優先於 Grid)
 - 篩選: FormControl, MenuItem, Chip
 - 狀態: Skeleton, Alert, Snackbar
+- 導航: AppBar, Button, Box
 
 ## Sprint 計劃
 
@@ -198,19 +205,80 @@ npx prisma studio
 
 ### Story 2 開始前的準備工作
 - [ ] 建立 pre-commit hook 自動執行 lint 和 build
-- [ ] 選擇穩定版本的 API 和組件，避免實驗性功能
-- [ ] 每次推送前執行 `npm run build` 測試
-- [ ] 準備 TDD 測試環境
+- [x] 選擇穩定版本的 API 和組件，避免實驗性功能
+- [x] 每次推送前執行 `npm run build` 測試
+- [x] 準備 TDD 測試環境
 
 ### 技術決策記錄
 - **響應式布局**: 優先使用 MUI Stack 而非 Grid2 (相容性考量)
 - **部署流程**: GitHub push → Vercel 自動部署
 - **錯誤處理**: TypeScript 嚴格模式幫助提早發現問題
+- **頁面架構**: 拆分為獨立頁面而非單頁應用 (UX 考量)
 
 ### 團隊協作優化
 - **明確 AC**: 未來 Story 的 AC 包含具體的技術要求
 - **分工清晰**: PO 負責需求、Tech 負責架構、Dev 負責實作
 - **問題解決**: 遇到技術問題時快速協作解決
+
+## Story 4 & 頁面拆分 Retrospective
+
+### 已完成的改進
+- [x] MUI 組件相容性問題：使用 Stack 而非 Grid2
+- [x] 頁面架構重構：分離表單和列表頁面
+- [x] 使用者體驗優化：表單成功後自動跳轉
+- [x] 導航系統：全域 AppBar 提供一致導航體驗
+
+### 學到的技術要點
+- **Next.js App Router**: 頁面路由和 metadata 設定
+- **MUI 版本相容性**: 需要查詢官方文檔確認 API
+- **用戶流程設計**: 頁面間的導航和狀態管理
+- **建置問題排除**: 清除 .next 目錄解決 routesManifest 錯誤
+
+### Story 5 開始前的準備工作
+- [ ] 建立全域狀態管理 (Context 或 Zustand)
+- [ ] 準備資料獲取策略 (SWR 或 TanStack Query)
+- [ ] 統一 loading 狀態處理模式
+- [ ] 設計組隊列表卡片組件
+
+### 重要技術債務
+- **優先級高**: 缺少全域狀態管理，頁面間資料同步問題
+- **優先級中**: 沒有統一的 loading 狀態處理
+- **優先級低**: 缺少頁面過渡動畫和骨架屏
+
+### 架構決策記錄
+- **頁面路由**: 使用 `/create` 和 `/groups` (語義化 URL)
+- **導航設計**: 全域 AppBar 提供一致體驗
+- **表單流程**: 成功提交後自動跳轉到組隊列表
+- **響應式策略**: 各頁面獨立優化而非統一布局
+
+---
+
+## 專案進度總覽
+
+### 完成的 Stories
+- ✅ **Story 1**: 建立基礎專案架構 (Commit: d2efb22)
+- ✅ **Story 2**: 設計並建立資料庫 Schema (Commit: 95a1be0)
+- ✅ **Story 3**: 實作 API 端點 (Commit: fb2c584)
+- ✅ **Story 4**: 實作組隊表單 (Commit: 7506155)
+- ✅ **頁面拆分**: 重構為獨立頁面架構 (Commit: 64e3dfb)
+
+### 待完成的 Stories
+- ⏳ **Story 5**: 顯示組隊列表 (準備中)
+- ⏳ **Story 6**: 實作篩選功能
+- ⏳ **Story 7**: 優化使用者體驗
+- ⏳ **Story 8**: 預留 Discord 登入整合點
+
+### 當前頁面結構
+```
+/ (首頁) - 導航和介紹頁面
+├── /create - 組隊表單頁面
+└── /groups - 組隊列表頁面
+```
+
+### 部署狀態
+- **Production**: https://play-with-me-in-artale.vercel.app
+- **Repository**: https://github.com/anthea-wu/play-with-me-in-artale
+- **自動部署**: ✅ 每次 push 到 main 分支
 
 ---
 

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import { Container, Typography, Box, Paper } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
+import { GroupsList } from '@/components/Groups';
 
 export const metadata: Metadata = {
   title: '組隊列表 - Artale 組隊網站',
@@ -18,14 +19,7 @@ export default function GroupsPage() {
         </Typography>
       </Box>
       
-      <Paper elevation={2} sx={{ p: 4, minHeight: '400px' }}>
-        <Typography variant="h6" color="text.secondary" align="center">
-          組隊列表功能將在 Story 5 實作
-        </Typography>
-        <Typography variant="body1" color="text.secondary" align="center" sx={{ mt: 2 }}>
-          這裡將顯示所有組隊請求的卡片列表
-        </Typography>
-      </Paper>
+      <GroupsList />
     </Container>
   );
 }
