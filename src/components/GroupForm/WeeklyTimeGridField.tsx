@@ -48,7 +48,10 @@ const TimeCell = styled(TableCell)<{ selected?: boolean; isDragging?: boolean }>
   msUserSelect: 'none',
   WebkitTouchCallout: 'none',
   WebkitTapHighlightColor: 'transparent',
-  touchAction: isDragging ? 'none' : 'auto', // 動態調整
+  // iOS Safari 特定優化
+  touchAction: 'none', // 完全禁用觸控手勢
+  overscrollBehavior: 'contain', // 防止過度滾動
+  WebkitOverflowScrolling: 'touch', // iOS 平滑滾動
   '@media (max-width: 768px)': {
     width: '28px',
     height: '28px',
@@ -176,6 +179,9 @@ export default function WeeklyTimeGridField() {
   const handleTouchStart = useCallback((day: string, hour: number, event: React.TouchEvent) => {
     const touch = event.touches[0];
     
+    // iOS Safari 需要立即阻止預設行為
+    event.preventDefault();
+    
     // 記錄起始位置
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     setTouchMoveCount(0);
@@ -192,8 +198,6 @@ export default function WeeklyTimeGridField() {
       // 開始拖拽
       startDrag(day, hour);
     }, LONG_PRESS_DURATION);
-    
-    // 阻止預設行為（但不要在這裡 preventDefault，會影響滾動）
   }, [startDrag]);
 
   // 2. 觸控移動 - 加入滑動檢測
@@ -206,22 +210,25 @@ export default function WeeklyTimeGridField() {
     
     setTouchMoveCount(prev => prev + 1);
     
+    // iOS Safari: 總是阻止預設行為，防止頁面滑動
+    event.preventDefault();
+    
     // 如果移動距離超過閾值，取消長按
     if ((deltaX > TOUCH_THRESHOLD || deltaY > TOUCH_THRESHOLD) && longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
       
-      // 如果不是在拖拽模式，就不要阻止滑動
-      if (!isDragging) {
+      // 如果不是在拖拽模式，且移動幅度較大，可能是想要滾動
+      if (!isDragging && (deltaX > TOUCH_THRESHOLD * 2 || deltaY > TOUCH_THRESHOLD * 2)) {
+        // 重置狀態並退出
+        setTouchStartPos(null);
+        setTouchMoveCount(0);
         return;
       }
     }
     
-    // 只有在拖拽模式下才處理
+    // 只有在拖拽模式下才處理格子選取
     if (!isDragging) return;
-    
-    // 阻止滑動
-    event.preventDefault();
     
     // 防抖處理：避免在同一個格子上重複觸發
     const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -318,25 +325,43 @@ export default function WeeklyTimeGridField() {
               </Box>
             </Typography>
 
-            <TableContainer 
-              component={Paper} 
+            {/* iOS Safari 觸控隔離包裝器 */}
+            <Box 
               sx={{ 
-                maxHeight: 400, 
-                overflow: 'auto',
-                // 動態調整觸控行為
-                touchAction: isDragging ? 'none' : 'auto',
-                '@media (max-width: 768px)': {
-                  maxWidth: '100%',
-                  overflowX: 'auto'
-                }
+                // iOS Safari 觸控隔離
+                touchAction: 'none',
+                overscrollBehavior: 'contain',
+                position: 'relative',
+                WebkitOverflowScrolling: 'touch',
               }}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
             >
+              <TableContainer 
+                component={Paper} 
+                sx={{ 
+                  maxHeight: 400, 
+                  overflow: 'auto',
+                  // iOS Safari 特定優化
+                  touchAction: 'none', // 完全禁用觸控手勢
+                  overscrollBehavior: 'contain', // 防止過度滾動
+                  WebkitOverflowScrolling: 'touch', // iOS 平滑滾動
+                  '@media (max-width: 768px)': {
+                    maxWidth: '100%',
+                    overflowX: 'auto'
+                  }
+                }}
+              >
               <Table 
                 ref={tableRef}
                 stickyHeader 
                 size="small" 
                 sx={{
                   minWidth: 600,
+                  // iOS Safari 特定優化
+                  touchAction: 'none',
+                  overscrollBehavior: 'contain',
                   '@media (max-width: 768px)': {
                     minWidth: 500
                   }
@@ -422,7 +447,8 @@ export default function WeeklyTimeGridField() {
                   ))}
                 </TableBody>
               </Table>
-            </TableContainer>
+              </TableContainer>
+            </Box>
 
             {selectedTimes.length > 0 && (
               <Box sx={{ mt: 2 }}>
