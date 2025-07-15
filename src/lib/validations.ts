@@ -1,14 +1,26 @@
 import { z } from 'zod';
 
+// Enums
+export enum JobEnum {
+  DRAGON_KNIGHT = '龍騎士',
+  PRIEST = '祭司'
+}
+
+export enum MapEnum {
+  DT = 'DT',
+  PW = 'PW',
+  CD = 'CD'
+}
+
 // Group validation schemas
 export const CreateGroupSchema = z.object({
-  job: z.enum(['龍騎士', '祭司'], {
+  job: z.nativeEnum(JobEnum, {
     message: 'Job must be either 龍騎士 or 祭司'
   }),
   level: z.number({
     message: 'Level must be a number'
   }).int().min(70, 'Level must be at least 70'),
-  map: z.enum(['DT', 'PW', 'CD'], {
+  map: z.nativeEnum(MapEnum, {
     message: 'Map must be DT, PW, or CD'
   }),
   startTime: z.string().datetime('Start time must be a valid ISO 8601 datetime'),
