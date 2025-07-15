@@ -1,6 +1,7 @@
 'use client';
 
 import { Controller, useFormContext } from 'react-hook-form';
+import { useState, useCallback, useRef } from 'react';
 import { 
   Box, 
   Typography, 
@@ -34,6 +35,9 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
       : theme.palette.action.hover,
   },
   userSelect: 'none',
+  WebkitUserSelect: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
   '@media (max-width: 768px)': {
     width: '28px',
     height: '28px',
@@ -64,6 +68,11 @@ const getTimeSlotKey = (day: string, hour: number) => {
 
 export default function WeeklyTimeGridField() {
   const { control, formState: { errors } } = useFormContext<CreateGroupInput>();
+  
+  // 拖拽狀態管理
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragAction, setDragAction] = useState<'select' | 'deselect'>('select');
+  const tableRef = useRef<HTMLTableElement>(null);
 
   return (
     <Controller
@@ -80,6 +89,45 @@ export default function WeeklyTimeGridField() {
           field.onChange(newSelectedTimes);
         };
 
+        // 拖拽開始
+        const handleMouseDown = useCallback((day: string, hour: number, event: React.MouseEvent) => {
+          event.preventDefault(); // 防止預設的拖拽行為
+          
+          const timeSlotKey = getTimeSlotKey(day, hour);
+          const isCurrentlySelected = selectedTimes.includes(timeSlotKey);
+          
+          setIsDragging(true);
+          setDragAction(isCurrentlySelected ? 'deselect' : 'select');
+          
+          // 立即處理當前格子
+          toggleTimeSlot(day, hour);
+        }, [selectedTimes, toggleTimeSlot]);
+
+        // 拖拽過程中
+        const handleMouseEnter = useCallback((day: string, hour: number) => {
+          if (!isDragging) return;
+          
+          const timeSlotKey = getTimeSlotKey(day, hour);
+          const isCurrentlySelected = selectedTimes.includes(timeSlotKey);
+          
+          // 根據拖拽動作決定是否要改變狀態
+          if (dragAction === 'select' && !isCurrentlySelected) {
+            toggleTimeSlot(day, hour);
+          } else if (dragAction === 'deselect' && isCurrentlySelected) {
+            toggleTimeSlot(day, hour);
+          }
+        }, [isDragging, dragAction, selectedTimes, toggleTimeSlot]);
+
+        // 拖拽結束
+        const handleMouseUp = useCallback(() => {
+          setIsDragging(false);
+        }, []);
+
+        // 滑鼠離開表格區域
+        const handleMouseLeave = useCallback(() => {
+          setIsDragging(false);
+        }, []);
+
         return (
           <Box>
             <Typography variant="subtitle2" gutterBottom>
@@ -87,7 +135,7 @@ export default function WeeklyTimeGridField() {
             </Typography>
             
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              點擊格子選擇您的可遊戲時間（已選擇 {selectedTimes.length} 個時段）
+              點擊或拖拽格子選擇您的可遊戲時間（已選擇 {selectedTimes.length} 個時段）
             </Typography>
 
             <TableContainer component={Paper} sx={{ 
@@ -98,12 +146,19 @@ export default function WeeklyTimeGridField() {
                 overflowX: 'auto'
               }
             }}>
-              <Table stickyHeader size="small" sx={{
-                minWidth: 600,
-                '@media (max-width: 768px)': {
-                  minWidth: 500
-                }
-              }}>
+              <Table 
+                ref={tableRef}
+                stickyHeader 
+                size="small" 
+                sx={{
+                  minWidth: 600,
+                  '@media (max-width: 768px)': {
+                    minWidth: 500
+                  }
+                }}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
+              >
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ 
@@ -166,6 +221,8 @@ export default function WeeklyTimeGridField() {
                             key={timeSlotKey}
                             selected={isSelected}
                             onClick={() => toggleTimeSlot(day.key, hour)}
+                            onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
+                            onMouseEnter={() => handleMouseEnter(day.key, hour)}
                           >
                             {isSelected ? '●' : ''}
                           </TimeCell>
