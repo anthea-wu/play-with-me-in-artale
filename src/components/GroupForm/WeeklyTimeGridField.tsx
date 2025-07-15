@@ -19,15 +19,15 @@ import { CreateGroupInput } from '@/lib/validations';
 
 const TimeCell = styled(TableCell)<{ selected?: boolean; isDragging?: boolean }>(({ theme, selected, isDragging }) => ({
   padding: '2px',
-  width: '32px',
-  height: '32px',
-  minWidth: '32px',
+  width: '28px',
+  height: '28px',
+  minWidth: '28px',
   cursor: 'pointer',
   border: `1px solid ${theme.palette.divider}`,
   textAlign: 'center',
   backgroundColor: selected ? theme.palette.primary.main : 'transparent',
   color: selected ? theme.palette.primary.contrastText : theme.palette.text.primary,
-  fontSize: '0.75rem',
+  fontSize: '0.65rem',
   transition: 'all 0.2s ease',
   position: 'relative',
   '&:hover': {
@@ -50,25 +50,21 @@ const TimeCell = styled(TableCell)<{ selected?: boolean; isDragging?: boolean }>
   WebkitTapHighlightColor: 'transparent',
   // 桌面設備保持正常觸控行為
   touchAction: 'auto',
+  // 增加觸控目標大小
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '-4px',
+    left: '-4px',
+    right: '-4px',
+    bottom: '-4px',
+    zIndex: -1,
+  },
   '@media (max-width: 768px)': {
-    width: '28px',
-    height: '28px',
-    minWidth: '28px',
-    fontSize: '0.65rem',
     // 手機設備才禁用觸控手勢
     touchAction: 'none',
     overscrollBehavior: 'contain',
     WebkitOverflowScrolling: 'touch',
-    // 增加觸控目標大小
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: '-4px',
-      left: '-4px',
-      right: '-4px',
-      bottom: '-4px',
-      zIndex: -1,
-    }
   },
 }));
 
@@ -396,11 +392,10 @@ export default function WeeklyTimeGridField() {
                 stickyHeader 
                 size="small" 
                 sx={{
-                  minWidth: 600,
+                  minWidth: 480, // 統一調整為較小尺寸 (28px * 7 天 + 60px 時間欄 + 邊距)
                   // 桌面設備保持正常行為
                   touchAction: 'auto',
                   '@media (max-width: 768px)': {
-                    minWidth: 500,
                     // 手機設備才啟用觸控優化
                     touchAction: 'none',
                     overscrollBehavior: 'contain',
@@ -428,12 +423,9 @@ export default function WeeklyTimeGridField() {
                         key={day.key} 
                         align="center" 
                         sx={{ 
-                          width: 50, 
+                          width: 40, 
                           padding: '8px',
-                          '@media (max-width: 768px)': {
-                            width: 40,
-                            fontSize: '0.75rem'
-                          }
+                          fontSize: '0.75rem'
                         }}
                       >
                         <Box component="span" sx={{
