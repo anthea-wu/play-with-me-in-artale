@@ -17,7 +17,9 @@ export const CreateGroupSchema = z.object({
   job: z.nativeEnum(JobEnum, {
     message: 'Job must be either 龍騎士 or 祭司'
   }),
-  level: z.number().int('請輸入整數').min(70, '目前開放的最低等級是 70 等'),
+  level: z.number({
+    error: '請輸入數字'
+  }).min(70, '目前開放的最低等級是 70 等'),
   map: z.nativeEnum(MapEnum, {
     message: 'Map must be DT, PW, or CD'
   }),

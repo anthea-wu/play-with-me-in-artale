@@ -16,15 +16,8 @@ export default function LevelField() {
           {...field}
           value={value || ''}
           onChange={(e) => onChange(e.target.value ? Number(e.target.value) : 0)}
-          onKeyDown={(e) => {
-            if (!/[0-9]/.test(e.key) && 
-                !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-              e.preventDefault();
-            }
-          }}
           label="等級"
-          type="number"
-          inputProps={{ min: 70 }}
+          inputMode="numeric"
           error={!!errors.level}
           helperText={errors.level?.message ?? ''}
           fullWidth
