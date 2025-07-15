@@ -1,7 +1,7 @@
 'use client';
 
 import { Controller, useFormContext } from 'react-hook-form';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { CreateGroupInput } from '@/lib/validations';
 
-const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected }) => ({
+const TimeCell = styled(TableCell)<{ selected?: boolean; isDragging?: boolean }>(({ theme, selected, isDragging }) => ({
   padding: '2px',
   width: '32px',
   height: '32px',
@@ -29,6 +29,7 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
   color: selected ? theme.palette.primary.contrastText : theme.palette.text.primary,
   fontSize: '0.75rem',
   transition: 'all 0.2s ease',
+  position: 'relative',
   '&:hover': {
     backgroundColor: selected 
       ? theme.palette.primary.dark 
@@ -39,7 +40,7 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
     backgroundColor: selected 
       ? theme.palette.primary.dark 
       : theme.palette.action.selected,
-    transform: 'scale(0.95)',
+    transform: isDragging ? 'none' : 'scale(0.95)', // 拖拽時不要縮放效果
   },
   userSelect: 'none',
   WebkitUserSelect: 'none',
@@ -47,13 +48,14 @@ const TimeCell = styled(TableCell)<{ selected?: boolean }>(({ theme, selected })
   msUserSelect: 'none',
   WebkitTouchCallout: 'none',
   WebkitTapHighlightColor: 'transparent',
+  touchAction: isDragging ? 'none' : 'auto', // 動態調整
   '@media (max-width: 768px)': {
     width: '28px',
     height: '28px',
     minWidth: '28px',
     fontSize: '0.65rem',
     // 增加觸控目標大小
-    '&::before': {
+    '&::after': {
       content: '""',
       position: 'absolute',
       top: '-4px',
@@ -77,6 +79,10 @@ const WEEKDAYS = [
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
+// 觸控常數
+const TOUCH_THRESHOLD = 8; // 觸控移動閾值（px）
+const LONG_PRESS_DURATION = 300; // 長按時間（ms）
+
 const formatHour = (hour: number) => {
   return hour.toString().padStart(2, '0') + ':00';
 };
@@ -93,6 +99,13 @@ export default function WeeklyTimeGridField() {
   const [dragAction, setDragAction] = useState<'select' | 'deselect'>('select');
   const tableRef = useRef<HTMLTableElement>(null);
   const fieldRef = useRef<{ value: string[]; onChange: (value: string[]) => void } | null>(null);
+
+  // 觸控狀態管理
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [touchMoveCount, setTouchMoveCount] = useState(0);
+  const [isLongPress, setIsLongPress] = useState(false);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastProcessedCell = useRef<string | null>(null);
 
   // 拖拽結束
   const handleMouseUp = useCallback(() => {
@@ -157,30 +170,120 @@ export default function WeeklyTimeGridField() {
     processDrag(day, hour);
   }, [processDrag]);
 
-  // 觸控事件
+  // 改進的觸控事件處理
+
+  // 1. 觸控開始 - 加入長按檢測
   const handleTouchStart = useCallback((day: string, hour: number, event: React.TouchEvent) => {
-    event.preventDefault();
-    startDrag(day, hour);
+    const touch = event.touches[0];
+    
+    // 記錄起始位置
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
+    setTouchMoveCount(0);
+    setIsLongPress(false);
+    lastProcessedCell.current = null;
+    
+    // 設置長按定時器
+    longPressTimer.current = setTimeout(() => {
+      setIsLongPress(true);
+      // 長按震動回饋（如果支援）
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      // 開始拖拽
+      startDrag(day, hour);
+    }, LONG_PRESS_DURATION);
+    
+    // 阻止預設行為（但不要在這裡 preventDefault，會影響滾動）
   }, [startDrag]);
 
+  // 2. 觸控移動 - 加入滑動檢測
   const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (!touchStartPos) return;
+    
+    const touch = event.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartPos.x);
+    const deltaY = Math.abs(touch.clientY - touchStartPos.y);
+    
+    setTouchMoveCount(prev => prev + 1);
+    
+    // 如果移動距離超過閾值，取消長按
+    if ((deltaX > TOUCH_THRESHOLD || deltaY > TOUCH_THRESHOLD) && longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+      
+      // 如果不是在拖拽模式，就不要阻止滑動
+      if (!isDragging) {
+        return;
+      }
+    }
+    
+    // 只有在拖拽模式下才處理
     if (!isDragging) return;
     
+    // 阻止滑動
     event.preventDefault();
     
-    // 獲取觸控點下的元素
-    const touch = event.touches[0];
+    // 防抖處理：避免在同一個格子上重複觸發
     const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-    
     if (elementBelow && elementBelow.getAttribute('data-time-slot')) {
-      const [day, hour] = elementBelow.getAttribute('data-time-slot')!.split('_');
+      const timeSlotKey = elementBelow.getAttribute('data-time-slot')!;
+      
+      // 如果是同一個格子，跳過
+      if (lastProcessedCell.current === timeSlotKey) {
+        return;
+      }
+      
+      lastProcessedCell.current = timeSlotKey;
+      const [day, hour] = timeSlotKey.split('_');
       processDrag(day, parseInt(hour));
     }
-  }, [isDragging, processDrag]);
+  }, [touchStartPos, isDragging, processDrag]);
 
-  // 觸控結束
-  const handleTouchEnd = useCallback(() => {
+  // 3. 觸控結束 - 清理狀態
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
+    // 清理長按定時器
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    
+    // 如果是短按且沒有拖拽，執行點擊
+    if (!isLongPress && touchMoveCount < 3 && !isDragging) {
+      const touch = event.changedTouches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      
+      if (elementBelow && elementBelow.getAttribute('data-time-slot')) {
+        const timeSlotKey = elementBelow.getAttribute('data-time-slot')!;
+        const [day, hour] = timeSlotKey.split('_');
+        toggleTimeSlot(day, parseInt(hour));
+      }
+    }
+    
+    // 重置狀態
     setIsDragging(false);
+    setTouchStartPos(null);
+    setTouchMoveCount(0);
+    setIsLongPress(false);
+    lastProcessedCell.current = null;
+  }, [isLongPress, touchMoveCount, isDragging, toggleTimeSlot]);
+
+  // 表格容器的改進
+  const handleTableTouchMove = useCallback((event: React.TouchEvent) => {
+    // 只有在拖拽時才阻止滑動
+    if (isDragging) {
+      event.preventDefault();
+    }
+    
+    handleTouchMove(event);
+  }, [isDragging, handleTouchMove]);
+
+  // cleanup effect
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+      }
+    };
   }, []);
 
   // 刪除時間標籤
@@ -215,14 +318,19 @@ export default function WeeklyTimeGridField() {
               </Box>
             </Typography>
 
-            <TableContainer component={Paper} sx={{ 
-              maxHeight: 400, 
-              overflow: 'auto',
-              '@media (max-width: 768px)': {
-                maxWidth: '100%',
-                overflowX: 'auto'
-              }
-            }}>
+            <TableContainer 
+              component={Paper} 
+              sx={{ 
+                maxHeight: 400, 
+                overflow: 'auto',
+                // 動態調整觸控行為
+                touchAction: isDragging ? 'none' : 'auto',
+                '@media (max-width: 768px)': {
+                  maxWidth: '100%',
+                  overflowX: 'auto'
+                }
+              }}
+            >
               <Table 
                 ref={tableRef}
                 stickyHeader 
@@ -235,7 +343,7 @@ export default function WeeklyTimeGridField() {
                 }}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseLeave}
-                onTouchMove={handleTouchMove}
+                onTouchMove={handleTableTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
                 <TableHead>
@@ -299,6 +407,7 @@ export default function WeeklyTimeGridField() {
                           <TimeCell
                             key={timeSlotKey}
                             selected={isSelected}
+                            isDragging={isDragging}
                             data-time-slot={timeSlotKey}
                             onClick={() => toggleTimeSlot(day.key, hour)}
                             onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
