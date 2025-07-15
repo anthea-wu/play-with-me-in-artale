@@ -34,6 +34,9 @@ export default function GroupFormProvider({ children, onSubmit, onSuccess }: Gro
 
   const methods = useForm<CreateGroupInput>({
     resolver: zodResolver(CreateGroupSchema),
+    defaultValues: {
+      level: 70,
+    }
   });
 
   const handleSubmit = async (data: CreateGroupInput) => {
@@ -56,7 +59,7 @@ export default function GroupFormProvider({ children, onSubmit, onSuccess }: Gro
   return (
     <GroupFormContext.Provider value={{ submitError, submitSuccess, isSubmitting }}>
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleSubmit)}>
+        <form onSubmit={(e) => { e.preventDefault(); methods.handleSubmit(handleSubmit)(e); }}>
           {children}
         </form>
       </FormProvider>

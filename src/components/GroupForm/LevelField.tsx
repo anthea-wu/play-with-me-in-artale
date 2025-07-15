@@ -11,14 +11,22 @@ export default function LevelField() {
     <Controller
       name="level"
       control={control}
-      render={({ field }) => (
+      render={({ field: { onChange, value, ...field } }) => (
         <TextField
           {...field}
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value ? Number(e.target.value) : 0)}
+          onKeyDown={(e) => {
+            if (!/[0-9]/.test(e.key) && 
+                !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+              e.preventDefault();
+            }
+          }}
           label="等級"
           type="number"
           inputProps={{ min: 70 }}
           error={!!errors.level}
-          helperText={errors.level?.message || '等級是必填的'}
+          helperText={errors.level?.message ?? ''}
           fullWidth
         />
       )}
