@@ -92,43 +92,6 @@ export default function Home() {
           </Card>
         </Stack>
       </Box>
-
-      {/* Features Section */}
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          功能特色
-        </Typography>
-        <Stack 
-          direction={{ xs: 'column', md: 'row' }} 
-          spacing={4} 
-          sx={{ mt: 4 }}
-        >
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              🎯 精準配對
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              根據職業、等級和地圖進行智能匹配
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              ⏰ 時間排程
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              設定遊戲時間，找到時間相符的隊友
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              💬 即時聯繫
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              支援遊戲內 ID 和 Discord 聯繫方式
-            </Typography>
-          </Box>
-        </Stack>
-      </Box>
     </Container>
   );
 }
