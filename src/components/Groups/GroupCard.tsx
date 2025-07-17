@@ -8,14 +8,18 @@ import {
   Chip, 
   IconButton,
   Divider,
-  Tooltip 
+  Tooltip,
+  Box,
+  Button 
 } from '@mui/material';
 import { 
   AccessTime, 
   Person, 
   LocationOn, 
   ContentCopy,
-  Launch 
+  Launch,
+  Edit,
+  Delete 
 } from '@mui/icons-material';
 import { useState } from 'react';
 import dayjs from 'dayjs';
@@ -32,9 +36,11 @@ interface GroupCardProps {
     discordId: string | null;
     createdAt: string;
   };
+  onEdit?: (groupId: string) => void;
+  onDelete?: (groupId: string) => void;
 }
 
-export function GroupCard({ group }: GroupCardProps) {
+export function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
   const [copyMessage, setCopyMessage] = useState<string>('');
 
   const handleCopyGameId = async () => {
@@ -179,6 +185,37 @@ export function GroupCard({ group }: GroupCardProps) {
               </Stack>
             )}
           </Stack>
+
+          {/* Edit and Delete buttons */}
+          {(onEdit || onDelete) && (
+            <>
+              <Divider />
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                {onEdit && (
+                  <Button
+                    size="small"
+                    startIcon={<Edit />}
+                    onClick={() => onEdit(group.id)}
+                    color="primary"
+                    variant="outlined"
+                  >
+                    修改
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    size="small"
+                    startIcon={<Delete />}
+                    onClick={() => onDelete(group.id)}
+                    color="error"
+                    variant="outlined"
+                  >
+                    刪除
+                  </Button>
+                )}
+              </Box>
+            </>
+          )}
         </Stack>
       </CardContent>
     </Card>

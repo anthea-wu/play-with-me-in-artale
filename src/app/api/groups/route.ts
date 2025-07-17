@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { randomBytes } from 'crypto';
 import { prisma } from '@/lib/db';
 import { CreateGroupSchema } from '@/lib/validations';
 import { 
@@ -12,9 +13,15 @@ export async function POST(request: NextRequest) {
     // Validate request body
     const validatedData = await validateRequestBody(request, CreateGroupSchema);
     
+    // Generate private key for the group
+    const privateKey = randomBytes(32).toString('hex');
+    
     // Create group in database
     const group = await prisma.group.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        privateKey,
+      },
     });
     
     return createSuccessResponse(group, 'Group created successfully', 201);

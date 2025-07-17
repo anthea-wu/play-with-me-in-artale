@@ -15,6 +15,7 @@ model Group {
   availableTimes String[] @map("available_times") // ["MON_14", "TUE_20", "WED_09"]
   gameId         String   @map("game_id")
   discordId      String?  @map("discord_id")
+  privateKey     String   @map("private_key") // 用於修改/刪除組隊的私鑰
   createdAt      DateTime @default(now()) @map("created_at")
   userId         String?  @map("user_id")
 

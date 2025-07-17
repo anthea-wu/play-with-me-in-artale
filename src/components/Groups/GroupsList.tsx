@@ -11,6 +11,8 @@ import {
 } from '@mui/material';
 import { GroupCard } from './GroupCard';
 import { GroupsFilter, FilterValues } from './GroupsFilter';
+import { EditGroupDialog } from './EditGroupDialog';
+import { DeleteGroupDialog } from './DeleteGroupDialog';
 import { filterGroups, getFilterSummary, hasActiveFilters } from '@/lib/filterUtils';
 
 interface Group {
@@ -41,6 +43,9 @@ export function GroupsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterValues>(DEFAULT_FILTERS);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
   const fetchGroups = async () => {
     try {
@@ -83,6 +88,38 @@ export function GroupsList() {
 
   const handleClearFilters = () => {
     setFilters(DEFAULT_FILTERS);
+  };
+
+  const handleEditGroup = (groupId: string) => {
+    setSelectedGroupId(groupId);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeleteGroup = (groupId: string) => {
+    setSelectedGroupId(groupId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchGroups(); // 重新獲取組隊列表
+    setEditDialogOpen(false);
+    setSelectedGroupId(null);
+  };
+
+  const handleDeleteSuccess = () => {
+    fetchGroups(); // 重新獲取組隊列表
+    setDeleteDialogOpen(false);
+    setSelectedGroupId(null);
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setSelectedGroupId(null);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setSelectedGroupId(null);
   };
 
   if (loading) {
@@ -154,9 +191,34 @@ export function GroupsList() {
       ) : (
         <Stack spacing={2} sx={{ mt: 2 }}>
           {filteredGroups.map((group) => (
-            <GroupCard key={group.id} group={group} />
+            <GroupCard 
+              key={group.id} 
+              group={group} 
+              onEdit={handleEditGroup}
+              onDelete={handleDeleteGroup}
+            />
           ))}
         </Stack>
+      )}
+
+      {/* Edit Dialog */}
+      {selectedGroupId && (
+        <EditGroupDialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          groupId={selectedGroupId}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {/* Delete Dialog */}
+      {selectedGroupId && (
+        <DeleteGroupDialog
+          open={deleteDialogOpen}
+          onClose={handleCloseDeleteDialog}
+          groupId={selectedGroupId}
+          onSuccess={handleDeleteSuccess}
+        />
       )}
     </Box>
   );

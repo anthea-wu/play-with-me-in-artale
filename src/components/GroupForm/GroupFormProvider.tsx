@@ -9,6 +9,7 @@ interface GroupFormContextType {
   submitError: string | null;
   submitSuccess: boolean;
   isSubmitting: boolean;
+  privateKey: string | null;
 }
 
 const GroupFormContext = createContext<GroupFormContextType | null>(null);
@@ -23,7 +24,7 @@ export const useGroupFormContext = () => {
 
 interface GroupFormProviderProps {
   children: ReactNode;
-  onSubmit: (data: CreateGroupInput) => Promise<void>;
+  onSubmit: (data: CreateGroupInput) => Promise<{ privateKey: string }>;
   onSuccess?: () => void;
 }
 
@@ -31,6 +32,7 @@ export default function GroupFormProvider({ children, onSubmit, onSuccess }: Gro
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [privateKey, setPrivateKey] = useState<string | null>(null);
 
   const methods = useForm<CreateGroupInput>({
     resolver: zodResolver(CreateGroupSchema),
@@ -48,7 +50,8 @@ export default function GroupFormProvider({ children, onSubmit, onSuccess }: Gro
     setSubmitSuccess(false);
 
     try {
-      await onSubmit(data);
+      const result = await onSubmit(data);
+      setPrivateKey(result.privateKey);
       setSubmitSuccess(true);
       methods.reset();
       onSuccess?.();
@@ -60,7 +63,7 @@ export default function GroupFormProvider({ children, onSubmit, onSuccess }: Gro
   };
 
   return (
-    <GroupFormContext.Provider value={{ submitError, submitSuccess, isSubmitting }}>
+    <GroupFormContext.Provider value={{ submitError, submitSuccess, isSubmitting, privateKey }}>
       <FormProvider {...methods}>
         <form onSubmit={(e) => { e.preventDefault(); methods.handleSubmit(handleSubmit)(e); }}>
           {children}
