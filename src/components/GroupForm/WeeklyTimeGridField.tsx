@@ -13,6 +13,8 @@ import {
   TableRow,
   Paper,
   Chip,
+  Card,
+  CardContent,
   styled
 } from '@mui/material';
 import { CreateGroupInput } from '@/lib/validations';
@@ -326,6 +328,222 @@ export default function WeeklyTimeGridField() {
         fieldRef.current = field;
         const selectedTimes = field.value || [];
 
+        const renderDesktopView = () => (
+          <Box 
+            sx={{ 
+              position: 'relative',
+              touchAction: 'auto',
+            }}
+          >
+            <TableContainer 
+              component={Paper} 
+              sx={{ 
+                maxHeight: 400, 
+                overflow: 'auto',
+                touchAction: 'auto',
+              }}
+            >
+            <Table 
+              ref={tableRef}
+              stickyHeader 
+              size="small" 
+              sx={{
+                minWidth: 480,
+                touchAction: 'auto',
+              }}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              onTouchMove={handleTableTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ 
+                    width: 60, 
+                    padding: '8px',
+                    position: 'sticky',
+                    left: 0,
+                    backgroundColor: 'background.paper',
+                    zIndex: 2
+                  }}>
+                    時間
+                  </TableCell>
+                  {WEEKDAYS.map(day => (
+                    <TableCell 
+                      key={day.key} 
+                      align="center" 
+                      sx={{ 
+                        width: 40, 
+                        padding: '8px',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      {day.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {HOURS.map(hour => (
+                  <TableRow key={hour}>
+                    <TableCell sx={{ 
+                      fontSize: '0.75rem', 
+                      padding: '2px 8px',
+                      position: 'sticky',
+                      left: 0,
+                      backgroundColor: 'background.paper',
+                      zIndex: 1
+                    }}>
+                      {formatHour(hour)}
+                    </TableCell>
+                    {WEEKDAYS.map(day => {
+                      const timeSlotKey = getTimeSlotKey(day.key, hour);
+                      const isSelected = selectedTimes.includes(timeSlotKey);
+                      
+                      return (
+                        <TimeCell
+                          key={timeSlotKey}
+                          selected={isSelected}
+                          isDragging={isDragging}
+                          data-time-slot={timeSlotKey}
+                          onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
+                          onMouseEnter={() => handleMouseEnter(day.key, hour)}
+                          onTouchStart={(event) => handleTouchStart(day.key, hour, event)}
+                        >
+                          {isSelected ? '●' : ''}
+                        </TimeCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            </TableContainer>
+          </Box>
+        );
+
+        const renderMobileView = () => (
+          <Box 
+            sx={{ 
+              position: 'relative',
+              touchAction: 'none',
+              overscrollBehavior: 'contain',
+              WebkitOverflowScrolling: 'touch',
+            }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {WEEKDAYS.map(day => {
+                const daySelectedTimes = selectedTimes.filter(time => time.startsWith(day.key));
+                
+                return (
+                  <Box key={day.key}>
+                    <Card 
+                      variant="outlined" 
+                      sx={{ 
+                        mb: 1,
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                        <Typography 
+                          variant="subtitle2" 
+                          sx={{ 
+                            mb: 1, 
+                            textAlign: 'center',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          星期{day.label} ({daySelectedTimes.length} 時段)
+                        </Typography>
+                        
+                        <Box 
+                          sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(6, 1fr)',
+                            gap: 0.5,
+                            maxWidth: '100%'
+                          }}
+                          onTouchMove={handleTableTouchMove}
+                          onTouchEnd={handleTouchEnd}
+                        >
+                          {HOURS.map(hour => {
+                            const timeSlotKey = getTimeSlotKey(day.key, hour);
+                            const isSelected = selectedTimes.includes(timeSlotKey);
+                            
+                            return (
+                              <Box
+                                key={timeSlotKey}
+                                data-time-slot={timeSlotKey}
+                                onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
+                                onMouseEnter={() => handleMouseEnter(day.key, hour)}
+                                onTouchStart={(event) => handleTouchStart(day.key, hour, event)}
+                                sx={{
+                                  padding: '4px 2px',
+                                  textAlign: 'center',
+                                  cursor: 'pointer',
+                                  border: 1,
+                                  borderColor: 'divider',
+                                  borderRadius: 1,
+                                  backgroundColor: isSelected 
+                                    ? 'primary.main' 
+                                    : 'transparent',
+                                  color: isSelected 
+                                    ? 'primary.contrastText' 
+                                    : 'text.primary',
+                                  fontSize: '0.65rem',
+                                  minHeight: '32px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  transition: 'all 0.2s ease',
+                                  userSelect: 'none',
+                                  WebkitUserSelect: 'none',
+                                  MozUserSelect: 'none',
+                                  msUserSelect: 'none',
+                                  WebkitTouchCallout: 'none',
+                                  WebkitTapHighlightColor: 'transparent',
+                                  touchAction: 'none',
+                                  '&:active': {
+                                    backgroundColor: isSelected 
+                                      ? 'primary.dark' 
+                                      : 'action.selected',
+                                    transform: isDragging ? 'none' : 'scale(0.95)',
+                                  },
+                                  '&:hover': {
+                                    backgroundColor: isSelected 
+                                      ? 'primary.dark' 
+                                      : 'action.hover',
+                                  }
+                                }}
+                              >
+                                <Box sx={{ fontWeight: 'bold', lineHeight: 1 }}>
+                                  {hour.toString().padStart(2, '0')}
+                                </Box>
+                                <Box sx={{ fontSize: '0.6rem', lineHeight: 1 }}>
+                                  :00
+                                </Box>
+                                {isSelected && (
+                                  <Box sx={{ fontSize: '0.8rem', lineHeight: 1, mt: 0.25 }}>
+                                    ●
+                                  </Box>
+                                )}
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Box>
+                );
+              })}
+            </Box>
+          </Box>
+        );
+
         return (
           <Box>
             <Typography variant="subtitle2" gutterBottom>
@@ -340,145 +558,19 @@ export default function WeeklyTimeGridField() {
               </Box>
             </Typography>
 
-            {/* 響應式觸控包裝器 */}
-            <Box 
-              sx={{ 
-                position: 'relative',
-                // 桌面設備保持正常行為
-                touchAction: 'auto',
-                '@media (max-width: 768px)': {
-                  // 手機設備才啟用觸控隔離
-                  touchAction: 'none',
-                  overscrollBehavior: 'contain',
-                  WebkitOverflowScrolling: 'touch',
-                }
-              }}
-              onTouchStart={(e) => {
-                // 只在手機設備上阻止事件冒泡
-                if (window.innerWidth <= 768) {
-                  e.stopPropagation();
-                }
-              }}
-              onTouchMove={(e) => {
-                if (window.innerWidth <= 768) {
-                  e.stopPropagation();
-                }
-              }}
-              onTouchEnd={(e) => {
-                if (window.innerWidth <= 768) {
-                  e.stopPropagation();
-                }
-              }}
-            >
-              <TableContainer 
-                component={Paper} 
-                sx={{ 
-                  maxHeight: 400, 
-                  overflow: 'auto',
-                  // 桌面設備保持正常滾動
-                  touchAction: 'auto',
-                  '@media (max-width: 768px)': {
-                    maxWidth: '100%',
-                    overflowX: 'auto',
-                    // 手機設備才啟用觸控優化
-                    touchAction: 'none',
-                    overscrollBehavior: 'contain',
-                    WebkitOverflowScrolling: 'touch',
-                  }
-                }}
-              >
-              <Table 
-                ref={tableRef}
-                stickyHeader 
-                size="small" 
-                sx={{
-                  minWidth: 480, // 統一調整為較小尺寸 (28px * 7 天 + 60px 時間欄 + 邊距)
-                  // 桌面設備保持正常行為
-                  touchAction: 'auto',
-                  '@media (max-width: 768px)': {
-                    // 手機設備才啟用觸控優化
-                    touchAction: 'none',
-                    overscrollBehavior: 'contain',
-                  }
-                }}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseLeave}
-                onTouchMove={handleTableTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ 
-                      width: 60, 
-                      padding: '8px',
-                      position: 'sticky',
-                      left: 0,
-                      backgroundColor: 'background.paper',
-                      zIndex: 2
-                    }}>
-                      時間
-                    </TableCell>
-                    {WEEKDAYS.map(day => (
-                      <TableCell 
-                        key={day.key} 
-                        align="center" 
-                        sx={{ 
-                          width: 40, 
-                          padding: '8px',
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        <Box component="span" sx={{
-                          '@media (max-width: 768px)': {
-                            display: 'block',
-                            fontSize: '0.65rem'
-                          }
-                        }}>
-                          {day.label}
-                        </Box>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {HOURS.map(hour => (
-                    <TableRow key={hour}>
-                      <TableCell sx={{ 
-                        fontSize: '0.75rem', 
-                        padding: '2px 8px',
-                        position: 'sticky',
-                        left: 0,
-                        backgroundColor: 'background.paper',
-                        zIndex: 1,
-                        '@media (max-width: 768px)': {
-                          fontSize: '0.65rem'
-                        }
-                      }}>
-                        {formatHour(hour)}
-                      </TableCell>
-                      {WEEKDAYS.map(day => {
-                        const timeSlotKey = getTimeSlotKey(day.key, hour);
-                        const isSelected = selectedTimes.includes(timeSlotKey);
-                        
-                        return (
-                          <TimeCell
-                            key={timeSlotKey}
-                            selected={isSelected}
-                            isDragging={isDragging}
-                            data-time-slot={timeSlotKey}
-                            onMouseDown={(event) => handleMouseDown(day.key, hour, event)}
-                            onMouseEnter={() => handleMouseEnter(day.key, hour)}
-                            onTouchStart={(event) => handleTouchStart(day.key, hour, event)}
-                          >
-                            {isSelected ? '●' : ''}
-                          </TimeCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </TableContainer>
+            {/* 響應式視圖切換 */}
+            <Box sx={{ 
+              '@media (min-width: 769px)': { display: 'block' },
+              '@media (max-width: 768px)': { display: 'none' }
+            }}>
+              {renderDesktopView()}
+            </Box>
+            
+            <Box sx={{ 
+              '@media (min-width: 769px)': { display: 'none' },
+              '@media (max-width: 768px)': { display: 'block' }
+            }}>
+              {renderMobileView()}
             </Box>
 
             {selectedTimes.length > 0 && (

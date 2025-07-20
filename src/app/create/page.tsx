@@ -19,7 +19,7 @@ export default function CreateGroupPage() {
         </Typography>
       </Box>
       
-      <Paper elevation={2} sx={{ p: 4, maxWidth: '600px', mx: 'auto' }}>
+  <Paper elevation={2} sx={{ p: 4, maxWidth: '600px', mx: 'auto' }}>
         <GroupForm />
       </Paper>
     </Container>
