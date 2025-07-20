@@ -9,9 +9,9 @@ const mockPrisma = {
     create: jest.fn(),
     findMany: jest.fn(),
   },
-} as any;
+};
 
-(prisma as any).group = mockPrisma.group;
+(prisma).group = mockPrisma.group;
 
 describe('/api/groups', () => {
   beforeEach(() => {
