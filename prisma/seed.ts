@@ -11,7 +11,7 @@ async function main() {
     data: {
       job: '龍騎士',
       level: 85,
-      map: 'DT',
+      maps: ['DT'],
       availableTimes: ['MON_20', 'MON_21', 'TUE_20', 'TUE_21', 'WED_20', 'WED_21'],
       gameId: 'DragonKnight123',
       discordId: 'dragon#1234',
@@ -23,7 +23,7 @@ async function main() {
     data: {
       job: '祭司',
       level: 78,
-      map: 'PW',
+      maps: ['PW'],
       availableTimes: ['MON_19', 'MON_20', 'TUE_19', 'TUE_20', 'FRI_19', 'FRI_20'],
       gameId: 'Priest456',
       discordId: null,
@@ -35,7 +35,7 @@ async function main() {
     data: {
       job: '龍騎士',
       level: 92,
-      map: 'CD',
+      maps: ['CD'],
       availableTimes: ['THU_21', 'THU_22', 'FRI_21', 'FRI_22', 'SAT_21', 'SAT_22', 'SUN_21', 'SUN_22'],
       gameId: 'EliteDragon',
       discordId: 'elite#5678',

@@ -45,7 +45,7 @@ export function EditGroupDialog({ open, onClose, groupId, onSuccess }: EditGroup
       privateKey: '',
       job: JobEnum.DRAGON_KNIGHT,
       level: 70,
-      map: MapEnum.DT,
+      maps: [MapEnum.DT],
       availableTimes: [],
       gameId: '',
       discordId: ''
@@ -94,7 +94,7 @@ export function EditGroupDialog({ open, onClose, groupId, onSuccess }: EditGroup
           setGroupData(group);
           setValue('job', group.job as JobEnum);
           setValue('level', group.level as number);
-          setValue('map', group.map as MapEnum);
+          setValue('maps', group.maps as MapEnum[]);
           setValue('availableTimes', group.availableTimes as string[]);
           setValue('gameId', group.gameId as string);
           setValue('discordId', (group.discordId as string) || '');
@@ -215,7 +215,7 @@ export function EditGroupDialog({ open, onClose, groupId, onSuccess }: EditGroup
               />
 
               <Controller
-                name="map"
+                name="maps"
                 control={control}
                 render={({ field }) => (
                   <TextField
@@ -224,8 +224,8 @@ export function EditGroupDialog({ open, onClose, groupId, onSuccess }: EditGroup
                     fullWidth
                     select
                     SelectProps={{ native: true }}
-                    error={!!errors.map}
-                    helperText={errors.map?.message}
+                    error={!!errors.maps}
+                    helperText={errors.maps?.message}
                   >
                     <option value={MapEnum.DT}>DT (Dragon Tower)</option>
                     <option value={MapEnum.PW}>PW (Phoenix Wing)</option>
