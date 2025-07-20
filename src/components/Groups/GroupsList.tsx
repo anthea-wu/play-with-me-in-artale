@@ -19,7 +19,7 @@ interface Group {
   id: string;
   job: string;
   level: number;
-  map: string;
+  maps: string[];
   availableTimes: string[];
   gameId: string;
   discordId: string | null;

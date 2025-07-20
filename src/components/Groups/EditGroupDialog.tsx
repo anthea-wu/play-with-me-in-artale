@@ -227,9 +227,9 @@ export function EditGroupDialog({ open, onClose, groupId, onSuccess }: EditGroup
                     error={!!errors.maps}
                     helperText={errors.maps?.message}
                   >
-                    <option value={MapEnum.DT}>DT (Dragon Tower)</option>
-                    <option value={MapEnum.PW}>PW (Phoenix Wing)</option>
-                    <option value={MapEnum.CD}>CD (Crystal Dungeon)</option>
+                    <option value={MapEnum.DT}>DT</option>
+                    <option value={MapEnum.PW}>PW</option>
+                    <option value={MapEnum.CD}>CD</option>
                   </TextField>
                 )}
               />

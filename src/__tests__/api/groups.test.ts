@@ -4,7 +4,14 @@ import { prisma } from '@/lib/db';
 
 // Mock the database
 jest.mock('@/lib/db');
-const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockPrisma = {
+  group: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+  },
+} as any;
+
+(prisma as any).group = mockPrisma.group;
 
 describe('/api/groups', () => {
   beforeEach(() => {
@@ -15,7 +22,7 @@ describe('/api/groups', () => {
     const validGroupData = {
       job: '龍騎士' as const,
       level: 85,
-      map: 'DT' as const,
+      maps: ['DT'] as const,
       startTime: '2025-07-15T20:00:00Z',
       endTime: '2025-07-15T22:00:00Z',
       gameId: 'TestPlayer123',
@@ -117,7 +124,7 @@ describe('/api/groups', () => {
           id: 'group1',
           job: '龍騎士',
           level: 85,
-          map: 'DT',
+          maps: ['DT'],
           startTime: new Date('2025-07-15T20:00:00Z'),
           endTime: new Date('2025-07-15T22:00:00Z'),
           gameId: 'Player1',
@@ -129,7 +136,7 @@ describe('/api/groups', () => {
           id: 'group2',
           job: '祭司',
           level: 78,
-          map: 'PW',
+          maps: ['PW'],
           startTime: new Date('2025-07-15T19:00:00Z'),
           endTime: new Date('2025-07-15T21:00:00Z'),
           gameId: 'Player2',
@@ -141,8 +148,7 @@ describe('/api/groups', () => {
 
       mockPrisma.group.findMany.mockResolvedValue(mockGroups);
 
-      const request = new NextRequest('http://localhost:3000/api/groups');
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -156,8 +162,7 @@ describe('/api/groups', () => {
     it('should return empty array when no groups exist', async () => {
       mockPrisma.group.findMany.mockResolvedValue([]);
 
-      const request = new NextRequest('http://localhost:3000/api/groups');
-      const response = await GET(request);
+      const response = await GET();
       const data = await response.json();
 
       expect(response.status).toBe(200);

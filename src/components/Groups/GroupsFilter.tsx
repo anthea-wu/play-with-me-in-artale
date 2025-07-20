@@ -107,9 +107,9 @@ export function GroupsFilter({
               onChange={(e) => handleMapChange(e.target.value)}
             >
               <MenuItem value="">全部</MenuItem>
-              <MenuItem value="DT">DT (Dragon Tower)</MenuItem>
-              <MenuItem value="PW">PW (Phoenix Wing)</MenuItem>
-              <MenuItem value="CD">CD (Crystal Dungeon)</MenuItem>
+              <MenuItem value="DT">DT</MenuItem>
+              <MenuItem value="PW">PW</MenuItem>
+              <MenuItem value="CD">CD</MenuItem>
             </Select>
           </FormControl>
 

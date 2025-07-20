@@ -30,7 +30,7 @@ interface GroupCardProps {
     id: string;
     job: string;
     level: number;
-    map: string;
+    maps: string[];
     availableTimes: string[];
     gameId: string;
     discordId: string | null;
@@ -74,14 +74,18 @@ export function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
   const getMapLabel = (map: string) => {
     switch (map) {
       case 'DT':
-        return 'Dragon Tower';
+        return 'DT';
       case 'PW':
-        return 'Phoenix Wing';
+        return 'PW';
       case 'CD':
-        return 'Crystal Dungeon';
+        return 'CD';
       default:
         return map;
     }
+  };
+
+  const formatMaps = (maps: string[]) => {
+    return maps.map(map => `${getMapLabel(map)}`).join(', ');
   };
 
   return (
@@ -115,11 +119,11 @@ export function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
             </Typography>
           </Stack>
 
-          {/* Map */}
+          {/* Maps */}
           <Stack direction="row" alignItems="center" spacing={1}>
             <LocationOn fontSize="small" color="action" />
             <Typography variant="body2">
-              {getMapLabel(group.map)} ({group.map})
+              {formatMaps(group.maps)}
             </Typography>
           </Stack>
 

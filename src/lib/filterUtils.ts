@@ -2,7 +2,7 @@ export interface Group {
   id: string;
   job: string;
   level: number;
-  map: string;
+  maps: string[];
   availableTimes: string[];
   gameId: string;
   discordId: string | null;
@@ -22,8 +22,8 @@ export function filterGroups(groups: Group[], filters: FilterValues): Group[] {
       return false;
     }
 
-    // Map filter - exact match
-    if (filters.map && group.map !== filters.map) {
+    // Map filter - check if selected map is in group's maps array
+    if (filters.map && !group.maps.includes(filters.map)) {
       return false;
     }
 

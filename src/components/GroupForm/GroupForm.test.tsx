@@ -111,7 +111,7 @@ describe('GroupForm', () => {
     
     const mapSelect = screen.getByRole('combobox', { name: /地圖/i });
     await user.click(mapSelect);
-    await user.click(screen.getByText('DT (Dragon Tower)'));
+    await user.click(screen.getByText('DT'));
     
     await user.type(screen.getByLabelText(/開始時間/i), '2025-07-15T20:00');
     await user.type(screen.getByLabelText(/結束時間/i), '2025-07-15T22:00');
@@ -161,7 +161,7 @@ describe('GroupForm', () => {
     
     const mapSelect = screen.getByRole('combobox', { name: /地圖/i });
     await user.click(mapSelect);
-    await user.click(screen.getByText('DT (Dragon Tower)'));
+    await user.click(screen.getByText('DT'));
     
     await user.type(screen.getByLabelText(/開始時間/i), '2025-07-15T20:00');
     await user.type(screen.getByLabelText(/結束時間/i), '2025-07-15T22:00');
@@ -198,7 +198,7 @@ describe('GroupForm', () => {
     
     const mapSelect = screen.getByRole('combobox', { name: /地圖/i });
     await user.click(mapSelect);
-    await user.click(screen.getByText('DT (Dragon Tower)'));
+    await user.click(screen.getByText('DT'));
     
     await user.type(screen.getByLabelText(/開始時間/i), '2025-07-15T20:00');
     await user.type(screen.getByLabelText(/結束時間/i), '2025-07-15T22:00');
