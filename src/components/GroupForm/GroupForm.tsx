@@ -41,45 +41,27 @@ function GroupFormContent() {
         </Alert>
       )}
 
-      {submitSuccess && privateKey && (
+      {
+        submitSuccess && 
+          privateKey &&
+          (
         <Box sx={{ mb: 2 }}>
           <Alert severity="success" sx={{ mb: 2 }}>
-            組隊請求已成功建立！3秒後將自動跳轉到組隊列表...
-          </Alert>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              <strong>重要！請保存您的私鑰：</strong>
-            </Typography>
-            <Paper 
-              elevation={1} 
+            <Typography 
+              onClick={handleCopyPrivateKey}
+              variant="body2" 
               sx={{ 
-                p: 2, 
-                bgcolor: 'grey.100', 
-                display: 'flex', 
-                alignItems: 'center',
-                gap: 1
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                flex: 1
               }}
             >
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  fontFamily: 'monospace',
-                  wordBreak: 'break-all',
-                  flex: 1
-                }}
-              >
-                {privateKey}
-              </Typography>
-              <IconButton 
-                onClick={handleCopyPrivateKey}
-                size="small"
-                title="複製私鑰"
-              >
-                <ContentCopy />
-              </IconButton>
-            </Paper>
-            <Typography variant="body2" sx={{ mt: 1, color: 'warning.main' }}>
-              此私鑰用於修改或刪除您的組隊請求，請妥善保管！
+              <strong>點擊保存密碼：</strong>
+                <br></br>
+              <strong>{privateKey}</strong>
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1, color: 'success.contractString' }}>
+              此密碼用於修改、刪除此次建立的組隊請求，請妥善保管！
             </Typography>
           </Alert>
         </Box>
@@ -123,12 +105,6 @@ export default function GroupForm({ onSuccess }: GroupFormProps) {
       throw new Error(result.error || 'Failed to create group');
     }
 
-    // 3秒後導航到組隊列表
-    setTimeout(() => {
-      router.push('/groups');
-    }, 3000);
-
-    // 返回包含 privateKey 的結果
     return { privateKey: result.data.privateKey };
   };
 
