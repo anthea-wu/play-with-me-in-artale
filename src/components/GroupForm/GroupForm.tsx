@@ -87,8 +87,7 @@ function GroupFormContent() {
                     fontFamily='monospace'
                     fontWeight='bold'
                 >
-                    {/*{privateKey}*/}
-                    123asdjfhlaksdhfkjl
+                    {privateKey}
                 </Typography>
                 <Typography variant="body2" color='textSecondary'>
                   點擊複製到剪貼板
