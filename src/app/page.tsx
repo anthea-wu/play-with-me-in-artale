@@ -14,6 +14,7 @@ import {
   Group as GroupIcon,
   SportsEsports as GamingIcon 
 } from '@mui/icons-material';
+import Footer from '@/components/Layout/Footer';
 
 export default function Home() {
   return (
@@ -92,6 +93,8 @@ export default function Home() {
           </Card>
         </Stack>
       </Box>
+      
+      <Footer />
     </Container>
   );
 }

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Container, Typography, Box } from '@mui/material';
 import { GroupsList } from '@/components/Groups';
+import Footer from '@/components/Layout/Footer';
 
 export const metadata: Metadata = {
   title: '組隊列表 - Artale 組隊網站',
@@ -20,6 +21,8 @@ export default function GroupsPage() {
       </Box>
       
       <GroupsList />
+      
+      <Footer />
     </Container>
   );
 }

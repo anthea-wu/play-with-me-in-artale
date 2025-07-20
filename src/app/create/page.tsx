@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Container, Typography, Box, Paper } from '@mui/material';
 import GroupForm from '@/components/GroupForm';
+import Footer from '@/components/Layout/Footer';
 
 export const metadata: Metadata = {
   title: '建立組隊 - Artale 組隊網站',
@@ -22,6 +23,8 @@ export default function CreateGroupPage() {
   <Paper elevation={2} sx={{ p: 4, maxWidth: '600px', mx: 'auto' }}>
         <GroupForm />
       </Paper>
+      
+      <Footer />
     </Container>
   );
 }
